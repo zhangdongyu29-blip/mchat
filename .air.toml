@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  bin = "tmp/mchat"
+  cmd = "go build -o tmp/mchat ./cmd/server"
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  exclude_dir = ["tmp", "web/node_modules", "web/dist"]
+
+[log]
+  time = true
+
+[dev]
+  cmd = "./tmp/mchat"
