@@ -11,14 +11,33 @@
       <div v-if="loading" class="empty">加载中…</div>
       <div v-else-if="roles.length === 0" class="empty">还没有角色，点击右上角新增</div>
       <div v-else class="role-grid">
-        <div v-for="r in roles" :key="r.id" class="role-card" @click="goChat(r.id)">
-          <div class="role-name">{{ r.name }}</div>
-          <div class="role-meta">{{ r.style || '默认语气' }}</div>
-          <div class="role-meta small ellipsis">{{ r.background || '无背景描述' }}</div>
-          <div class="card-actions">
-            <div class="pill gray">{{ r.call_me ? '称呼我：' + r.call_me : '未设置称呼' }}</div>
-            <button class="icon-btn danger-text" @click.stop="removeRole(r.id)">❌</button>
+        <div
+          v-for="r in roles"
+          :key="r.id"
+          class="role-card"
+        >
+          <div
+            class="swipe-track"
+            :style="{ transform: `translateX(${swipeOffsets[r.id] || 0}px)` }"
+            @pointerdown="onSwipeStart(r.id, $event)"
+            @pointermove="onSwipeMove(r.id, $event)"
+            @pointerup="onSwipeEnd(r.id, $event)"
+            @pointercancel="onSwipeEnd(r.id, $event)"
+            @pointerleave="onSwipeEnd(r.id, $event)"
+            @click="onCardClick(r.id)"
+          >
+            <div class="role-name">{{ r.name }}</div>
+            <div class="role-meta">{{ r.style || '默认语气' }}</div>
+            <div class="role-meta small ellipsis">{{ r.background || '无背景描述' }}</div>
+            <div class="card-actions">
+              <div class="pill gray">{{ r.call_me ? '称呼我：' + r.call_me : '未设置称呼' }}</div>
+            </div>
           </div>
+          <button
+            class="swipe-delete"
+            :class="{ visible: (swipeOffsets[r.id] || 0) <= -60 }"
+            @click.stop="removeRole(r.id)"
+          >删除</button>
         </div>
       </div>
     </section>
@@ -75,6 +94,10 @@ const submitting = ref(false)
 const showModal = ref(false)
 const showDeleteConfirm = ref(false)
 const deleteTargetId = ref(null)
+const swipeOffsets = ref({})
+const swipeStartX = ref(null)
+const swipeActiveId = ref(null)
+const swipePointerId = ref(null)
 const form = ref({
   name: '',
   background: '',
@@ -138,6 +161,45 @@ const confirmRemove = async () => {
 
 const goChat = (id) => {
   router.push({ path: '/chat', query: { roleId: id } })
+}
+
+const onSwipeStart = (id, e) => {
+  // 收起其他卡片
+  swipeOffsets.value = { [id]: 0 }
+  swipeActiveId.value = id
+  swipeStartX.value = e.clientX
+  swipePointerId.value = e.pointerId
+  if (e.target?.setPointerCapture) {
+    e.target.setPointerCapture(e.pointerId)
+  }
+}
+const onSwipeMove = (id, e) => {
+  if (swipeActiveId.value !== id || swipeStartX.value === null) return
+  const delta = e.clientX - swipeStartX.value
+  // only allow left swipe
+  const offset = Math.max(-100, Math.min(0, delta))
+  swipeOffsets.value = { ...swipeOffsets.value, [id]: offset }
+}
+const onSwipeEnd = (id, e) => {
+  if (swipeActiveId.value !== id) return
+  const current = swipeOffsets.value[id] || 0
+  const finalOffset = current <= -60 ? -90 : 0
+  swipeOffsets.value = { ...swipeOffsets.value, [id]: finalOffset }
+  if (swipePointerId.value !== null && e.target?.releasePointerCapture) {
+    try { e.target.releasePointerCapture(swipePointerId.value) } catch {}
+  }
+  swipeActiveId.value = null
+  swipeStartX.value = null
+  swipePointerId.value = null
+}
+const onCardClick = (id) => {
+  const offset = swipeOffsets.value[id] || 0
+  if (offset < -10) {
+    // tap to close swipe
+    swipeOffsets.value = { ...swipeOffsets.value, [id]: 0 }
+    return
+  }
+  goChat(id)
 }
 
 onMounted(load)

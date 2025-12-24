@@ -6,23 +6,14 @@
         <span v-if="currentRole">{{ currentRole.name }}</span>
         <span v-else>请选择角色</span>
       </div>
-      <div class="actions">
+      <div class="actions action-row">
+        <button class="ghost" @click="openConvModal" :disabled="!currentRole">会话列表</button>
+        <button @click="createConversation" :disabled="!currentRole">新对话</button>
         <button class="ghost" @click="openRolePanel" :disabled="!currentRole">角色设定</button>
-        <button class="ghost" @click="refreshAll" :disabled="loading">刷新</button>
       </div>
     </header>
 
     <div class="chat-layout">
-      <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
-        <div class="sidebar-header">
-          <div class="label">会话</div>
-          <div class="side-actions">
-            <button class="ghost small" @click="openConvModal" :disabled="!currentRole">会话列表</button>
-            <button class="small" @click="createConversation" :disabled="!currentRole">新对话</button>
-          </div>
-        </div>
-      </aside>
-
       <section class="chat-panel">
         <div class="chat-toolbar"></div>
 

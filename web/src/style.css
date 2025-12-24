@@ -1,31 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Marcellus&display=swap');
+
 :root {
-  --bg: radial-gradient(circle at 20% 20%, #f5f8ff 0, #f1f5ff 25%, #fdfdff 60%);
-  --card: #ffffff;
-  --border: #e5e7eb;
-  --text: #0f172a;
+  --bg: linear-gradient(180deg, rgba(12, 27, 51, 0.16), rgba(255, 255, 255, 0.4));
+  --card: rgba(255, 255, 255, 0.82);
+  --border: rgba(58, 74, 110, 0.12);
+  --text: #0c1b33;
   --muted: #6b7280;
-  --primary: #2563eb;
-  --primary-soft: #e3edff;
-  --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-  font-family: "Inter", "PingFang SC", system-ui, -apple-system, sans-serif;
+  --primary: #2d5be3;
+  --primary-soft: rgba(45, 91, 227, 0.12);
+  --gold: #d1a74a;
+  --shadow: 0 14px 40px rgba(12, 27, 51, 0.14);
+  font-family: "Noto Sans SC", "Inter", "PingFang SC", system-ui, -apple-system, sans-serif;
 }
 * { box-sizing: border-box; }
-body { margin: 0; color: var(--text); background: var(--bg); }
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    linear-gradient(180deg, rgba(12, 27, 51, 0.18), rgba(255, 255, 255, 0.35)),
+    url('/bgm.jpg') center/cover fixed;
+  backdrop-filter: blur(0px);
+}
 .app-shell { min-height: 100vh; }
-.page { min-height: 100vh; padding: 12px 12px 80px; max-width: 1180px; margin: 0 auto; }
+.page { min-height: 100vh; padding: 12px 12px 80px; max-width: 1100px; margin: 0 auto; }
 
-.page-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 4px 8px; }
-.page-header .title { font-size: 20px; font-weight: 800; }
-.page-header .actions { display: flex; gap: 10px; }
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 16px 4px 12px;
+  margin-bottom: 10px;
+}
+.page-header .title {
+  font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
+  margin-right: 8px;
+  font-family: 'Cinzel Decorative', 'Noto Sans SC', serif;
+  color: #f8fafc;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.6);
+}
+.page-header .actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex: 1;
+  justify-content: flex-start;
+}
+.action-row button {
+  min-width: 84px;
+  padding: 10px 14px;
+  height: 42px;
+}
 
-.tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(2,1fr); padding: 8px 12px; gap: 10px; z-index: 20; }
-.tabbar button { box-shadow: none; border: 1px solid var(--border); background: #fff; color: var(--text); }
-.tabbar button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(12, 27, 51, 0.35), rgba(12, 27, 51, 0.6));
+  border-top: 1px solid rgba(255,255,255,0.14);
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  padding: 10px 14px;
+  gap: 12px;
+  z-index: 20;
+  backdrop-filter: blur(10px);
+}
+.tabbar button {
+  box-shadow: 0 8px 18px rgba(12, 27, 51, 0.2);
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.18);
+  color: #f8fafc;
+  border-radius: 16px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.tabbar button.active {
+  background: linear-gradient(135deg, rgba(45, 91, 227, 0.9), rgba(93, 147, 255, 0.9));
+  color: #fdfdfd;
+  border-color: rgba(255,255,255,0.5);
+  box-shadow: 0 10px 24px rgba(12, 27, 51, 0.3);
+}
 
-button { border: none; background: var(--primary); color: #fff; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; box-shadow: none; transition: transform 0.1s ease, box-shadow 0.1s ease; }
-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow); }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-button.ghost { background: var(--primary-soft); color: var(--primary); box-shadow: none; }
+button {
+  border: 1px solid rgba(255,255,255,0.55);
+  background: linear-gradient(135deg, rgba(45, 91, 227, 0.9), rgba(93, 147, 255, 0.85));
+  color: #fdfdfd;
+  padding: 11px 16px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 10px 24px rgba(12, 27, 51, 0.25);
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+  font-family: 'Cinzel Decorative', 'Noto Sans SC', sans-serif;
+}
+button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(12, 27, 51, 0.32); filter: brightness(1.03); }
+button:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
+button.ghost {
+  background: rgba(255,255,255,0.12);
+  color: #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 6px 16px rgba(12, 27, 51, 0.18);
+}
 button.small { padding: 8px 10px; font-size: 13px; }
 button.tiny { padding: 4px 6px; font-size: 12px; }
 button.danger { background: #ef4444; }
@@ -33,25 +112,25 @@ button.danger { background: #ef4444; }
 input, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #f9fafb; font-size: 14px; }
 .empty { color: var(--muted); text-align: center; }
 
-.chat-layout { display: grid; grid-template-columns: 320px 1fr; gap: 14px; align-items: start; }
-.sidebar { border: none; border-radius: 0; background: transparent; box-shadow: none; padding: 6px 0; min-height: auto; }
+.chat-layout { display: grid; grid-template-columns: 220px 1fr; gap: 14px; align-items: start; margin-top: 4px; }
+.sidebar { border: none; border-radius: 0; background: transparent; box-shadow: none; padding: 4px 0; min-height: auto; }
 .sidebar.collapsed { width: 140px; }
-.sidebar-header { display: flex; align-items: center; gap: 12px; }
+.sidebar-header { display: flex; align-items: center; gap: 12px; justify-content: flex-start; }
 .sidebar .label {
   font-weight: 800;
-  color: #111827;
+  color: #0c1b33;
   font-size: 14px;
   padding: 10px 14px;
-  background: #eef2ff;
+  background: linear-gradient(90deg, rgba(45, 91, 227, 0.12), rgba(209, 167, 74, 0.16));
   border-radius: 999px;
   white-space: nowrap;
   line-height: 1;
+  border: 1px solid rgba(45, 91, 227, 0.18);
 }
 .side-actions {
   display: flex;
   gap: 10px;
-  margin-left: auto;
-  padding: 0;
+  padding: 4px 0;
 }
 .side-actions button {
   box-shadow: none;
@@ -62,8 +141,9 @@ input, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 
   min-width: 96px;
 }
 .side-actions .ghost {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: rgba(45, 91, 227, 0.12);
+  color: #2d5be3;
+  border: 1px solid rgba(45, 91, 227, 0.2);
 }
 
 .icon-btn {
@@ -92,55 +172,63 @@ input, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 
 .sidebar.collapsed .conversation-list { display: none; }
 
 .chat-panel {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: #fff;
-  box-shadow: var(--shadow);
-  padding: 12px;
+  border: 1px solid rgba(45, 91, 227, 0.12);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(12, 27, 51, 0.26), rgba(255, 255, 255, 0.8));
+  box-shadow: 0 18px 38px rgba(12, 27, 51, 0.28);
+  padding: 16px 14px 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-height: 420px;
-  height: calc(100vh - 260px);
-  max-height: calc(100vh - 210px);
+  height: calc(100vh - 240px);
+  max-height: calc(100vh - 190px);
   overflow: hidden;
 }
 .chat-toolbar .heading { font-size: 16px; font-weight: 800; }
 .chat-toolbar .sub { color: var(--muted); font-size: 13px; }
 .chat-box {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 12px;
-  padding: 10px;
+  padding: 12px;
   min-height: 200px;
   flex: 1;
   overflow-y: auto;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   overflow-anchor: none;
-  background: #f8fafc;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.78)),
+    url('/bgm.jpg') center/cover fixed;
 }
 .chat-messages { display: flex; flex-direction: column; gap: 12px; padding: 0 6px; }
 .bubble {
-  background: #fff;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 14px;
   padding: 10px 12px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(45, 91, 227, 0.14);
+  box-shadow: 0 10px 28px rgba(12, 27, 51, 0.08);
   max-width: 78%;
 }
 .bubble[data-from="user"] {
   align-self: flex-end;
-  background: var(--primary-soft);
-  border-radius: 12px 12px 4px 12px;
+  background: linear-gradient(135deg, rgba(45, 91, 227, 0.18), rgba(45, 91, 227, 0.08));
+  border-radius: 14px 14px 6px 14px;
 }
 .bubble[data-from="ai"] {
   align-self: flex-start;
-  border-radius: 12px 12px 12px 4px;
+  border-radius: 14px 14px 14px 6px;
 }
 .bubble.streaming { border-style: dashed; }
 .sender { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .input-bar { display: flex; gap: 8px; }
-.input-bar input { flex: 1; }
+.input-bar input {
+  flex: 1;
+  background: rgba(255,255,255,0.92);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.input-bar button { min-width: 88px; }
 
 .modal-mask { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; z-index: 30; }
 .modal { background: #fff; border-radius: 14px; padding: 16px; width: 380px; box-shadow: var(--shadow); }
@@ -158,33 +246,93 @@ input, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 
 .roles-page .page-header { padding-top: 8px; }
 .role-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  align-items: stretch;
 }
 .role-card {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 12px;
-  background: #fff;
-  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(45, 91, 227, 0.22);
+  border-radius: 18px;
+  padding: 16px 14px;
+  touch-action: pan-y;
+  background:
+    linear-gradient(180deg, rgba(12, 27, 51, 0.38), rgba(12, 27, 51, 0.12)),
+    url('/card.jpg') center/cover no-repeat,
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0.72) 38%, rgba(230, 238, 255, 0.6) 100%);
+  box-shadow: 0 18px 36px rgba(12, 27, 51, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
   display: flex;
   flex-direction: column;
   gap: 6px;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
+.role-card:nth-child(2n) { margin-top: 10px; }
+.role-card .swipe-track {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.18s ease;
+  padding-right: 18px; /* leave room for delete reveal */
+  cursor: grab;
+}
+.role-card .swipe-delete {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.28);
+  color: #fef2f2;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 1;
+}
+.role-card .swipe-delete.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1.02);
+}
+.role-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(209, 167, 74, 0.16), transparent 46%),
+              radial-gradient(circle at 20% 80%, rgba(45, 91, 227, 0.12), transparent 40%);
+  pointer-events: none;
+}
+.role-card::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
 .role-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 36px rgba(12, 27, 51, 0.22), 0 0 0 1px rgba(45, 91, 227, 0.24);
 }
 .role-card .role-name {
   font-weight: 800;
-  font-size: 16px;
+  font-size: 18px;
+  font-family: 'Cinzel Decorative', 'Noto Sans SC', serif;
+  color: #f8fafc;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.45);
 }
 .role-card .role-meta {
-  color: var(--muted);
+  color: #e5e7eb;
   font-size: 13px;
   line-height: 1.4;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.35);
 }
 .role-card .role-meta.small {
   font-size: 12px;
