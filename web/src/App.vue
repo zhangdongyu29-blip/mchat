@@ -1,7 +1,6 @@
 <template>
   <div class="page">
     <header class="topbar">
-      <div class="title">mchat · H5 小程序风格</div>
       <div class="actions">
         <button class="ghost" @click="fetchRoles">刷新角色</button>
         <button class="ghost" @click="fetchMemories" :disabled="!activeRoleId">加载记忆</button>
@@ -54,9 +53,25 @@
         <div class="chat-box">
           <div v-if="messages.length === 0" class="empty">暂无聊天记录</div>
           <div v-else class="chat-messages">
-            <div v-for="m in messages" :key="m.id" class="bubble" :data-from="m.sender">
+            <div
+              v-for="m in messages"
+              :key="m.id"
+              class="bubble"
+              :data-from="m.sender"
+              :class="{ streaming: m.streaming }"
+            >
               <div class="sender">{{ senderLabel(m.sender) }}</div>
-              <div class="content">{{ m.content }}</div>
+              <div class="content">
+                <template v-if="m.streaming && !m.content">
+                  <span class="dot-flash"></span>
+                  <span class="dot-flash"></span>
+                  <span class="dot-flash"></span>
+                </template>
+                <template v-else>
+                  {{ m.content }}
+                  <span v-if="m.streaming" class="caret">▋</span>
+                </template>
+              </div>
             </div>
           </div>
         </div>
@@ -91,8 +106,9 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
 const base = import.meta.env.VITE_API_BASE || ''
+const apiBase = base ? base.replace(/\/$/, '') : ''
 const api = axios.create({
-  baseURL: base ? `${base.replace(/\/$/, '')}/api` : '/api',
+  baseURL: apiBase ? `${apiBase}/api` : '/api',
 })
 
 const roles = ref([])
@@ -100,6 +116,7 @@ const messages = ref([])
 const memories = ref([])
 const activeRoleId = ref(null)
 const sending = ref(false)
+const streaming = ref(false)
 const chatInput = ref('')
 const roleForm = ref({
   name: '',
@@ -153,29 +170,70 @@ const createRole = async () => {
 const sendMessage = async () => {
   if (!chatInput.value.trim() || !activeRoleId.value) return
   sending.value = true
+  streaming.value = true
   try {
-    const { data } = await api.post('/chat', {
-      role_id: activeRoleId.value,
-      message: chatInput.value,
-    })
+    const userContent = chatInput.value
     messages.value.push({
       id: Date.now(),
       sender: 'user',
-      content: chatInput.value,
+      content: userContent,
     })
+
+    const streamingId = Date.now() + 1
     messages.value.push({
-      id: Date.now() + 1,
+      id: streamingId,
       sender: 'ai',
-      content: data.reply,
+      content: '',
+      streaming: true,
     })
     chatInput.value = ''
+
+    await streamChat(userContent, streamingId)
     await fetchMemories()
   } catch (e) {
     alert(e.response?.data?.error || e.message)
   } finally {
     sending.value = false
+    streaming.value = false
   }
 }
 
 onMounted(fetchRoles)
+
+const streamChat = async (text, streamingId) => {
+  const url = apiBase ? `${apiBase}/api/chat` : '/api/chat'
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role_id: activeRoleId.value, message: text }),
+  })
+  if (!res.ok || !res.body) {
+    throw new Error(`请求失败 ${res.status}`)
+  }
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let done = false
+  while (!done) {
+    const { value, done: streamDone } = await reader.read()
+    done = streamDone
+    if (value) {
+      const chunk = decoder.decode(value, { stream: true })
+      appendStreaming(streamingId, chunk)
+    }
+  }
+  finalizeStreaming(streamingId)
+}
+
+const appendStreaming = (streamingId, chunk) => {
+  const idx = messages.value.findIndex(m => m.id === streamingId)
+  if (idx === -1) return
+  messages.value[idx].content += chunk
+}
+
+const finalizeStreaming = (streamingId) => {
+  const idx = messages.value.findIndex(m => m.id === streamingId)
+  if (idx === -1) return
+  messages.value[idx].streaming = false
+}
 </script>

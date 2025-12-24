@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -20,8 +21,11 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-// CompletionResponse holds minimal response fields.
-type CompletionResponse struct {
+// StreamChunk is exported for server to decode SSE chunks.
+type StreamChunk = streamChunk
+
+// completionResponse holds minimal response fields.
+type completionResponse struct {
 	Choices []struct {
 		Message Message `json:"message"`
 	} `json:"choices"`
@@ -61,7 +65,7 @@ func Chat(ctx context.Context, cfg config.Config, messages []Message) (string, e
 	}
 	defer resp.Body.Close()
 
-	var out CompletionResponse
+	var out completionResponse
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
 		return "", err
 	}
@@ -72,4 +76,52 @@ func Chat(ctx context.Context, cfg config.Config, messages []Message) (string, e
 		return "", fmt.Errorf("no choices returned")
 	}
 	return out.Choices[0].Message.Content, nil
+}
+
+type streamChunk struct {
+	Choices []struct {
+		Delta struct {
+			Content string `json:"content"`
+		} `json:"delta"`
+	} `json:"choices"`
+	Error *struct {
+		Message string `json:"message"`
+	} `json:"error"`
+}
+
+// ChatStream calls OpenRouter with stream enabled and returns the raw response body.
+func ChatStream(ctx context.Context, cfg config.Config, messages []Message) (*http.Response, error) {
+	if cfg.OpenRouterAPIKey == "" {
+		return nil, errors.New("OPENROUTER_API_KEY 未配置")
+	}
+	body := map[string]any{
+		"model":    defaultModel,
+		"stream":   true,
+		"messages": messages,
+		"reasoning": map[string]bool{
+			"enabled": false,
+		},
+	}
+	buf, _ := json.Marshal(body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, cfg.OpenRouterURL, bytes.NewReader(buf))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+cfg.OpenRouterAPIKey)
+	req.Header.Set("HTTP-Referer", "https://github.com/zhangdongyu29-blip/mchat")
+	req.Header.Set("X-Title", "mchat")
+	req.Header.Set("Accept", "text/event-stream")
+
+	client := &http.Client{Timeout: 0} // streaming, no overall timeout here
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("openrouter status %d: %s", resp.StatusCode, string(b))
+	}
+	return resp, nil
 }

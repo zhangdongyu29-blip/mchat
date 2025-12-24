@@ -1,8 +1,10 @@
 package server
 
 import (
+	"bufio"
 	"context"
 	"embed"
+	"encoding/json"
 	"io/fs"
 	"net/http"
 	"strconv"
@@ -94,10 +96,6 @@ type chatRequest struct {
 	Message string `json:"message" binding:"required"`
 }
 
-type chatResponse struct {
-	Reply string `json:"reply"`
-}
-
 func chatHandler(c *gin.Context, cfg config.Config) {
 	var req chatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -128,17 +126,57 @@ func chatHandler(c *gin.Context, cfg config.Config) {
 	}
 	messages = append(messages, ai.Message{Role: "user", Content: req.Message})
 
-	reply, err := ai.Chat(ctx, cfg, messages)
+	db.DB.Create(&model.ChatMessage{RoleID: req.RoleID, Sender: "user", Content: req.Message})
+
+	resp, err := ai.ChatStream(ctx, cfg, messages)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	defer resp.Body.Close()
 
-	db.DB.Create(&model.ChatMessage{RoleID: req.RoleID, Sender: "user", Content: req.Message})
-	db.DB.Create(&model.ChatMessage{RoleID: req.RoleID, Sender: "ai", Content: reply})
+	c.Header("Content-Type", "text/plain; charset=utf-8")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Status(http.StatusOK)
+
+	reader := bufio.NewReader(resp.Body)
+	var reply strings.Builder
+	flusher, _ := c.Writer.(http.Flusher)
+
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+		if !strings.HasPrefix(line, "data:") {
+			continue
+		}
+		data := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
+		if data == "[DONE]" {
+			break
+		}
+		var chunk ai.StreamChunk
+		if err := json.Unmarshal([]byte(data), &chunk); err != nil {
+			continue
+		}
+		if len(chunk.Choices) == 0 {
+			continue
+		}
+		token := chunk.Choices[0].Delta.Content
+		if token == "" {
+			continue
+		}
+		reply.WriteString(token)
+		_, _ = c.Writer.Write([]byte(token))
+		if flusher != nil {
+			flusher.Flush()
+		}
+	}
+
+	finalReply := reply.String()
+	db.DB.Create(&model.ChatMessage{RoleID: req.RoleID, Sender: "ai", Content: finalReply})
 	_ = maybeSummarize(req.RoleID)
-
-	c.JSON(http.StatusOK, chatResponse{Reply: reply})
 }
 
 func listMessages(c *gin.Context) {
