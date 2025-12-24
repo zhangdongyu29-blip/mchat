@@ -32,5 +32,5 @@ func Connect(cfg config.Config) error {
 
 // AutoMigrate migrates database schemas.
 func AutoMigrate() error {
-	return DB.AutoMigrate(&model.Role{}, &model.ChatMessage{}, &model.Memory{})
+	return DB.AutoMigrate(&model.Role{}, &model.Conversation{}, &model.ChatMessage{}, &model.Memory{})
 }
